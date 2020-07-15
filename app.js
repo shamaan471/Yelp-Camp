@@ -16,7 +16,7 @@ var commentRoutes    = require("./routes/comments"),
     campgroundRoutes = require("./routes/campgrounds"),
     indexRoutes      = require("./routes/index")
     
-mongoose.connect("mongodb+srv://shamaan321:pk4710086@yelpcamp.gpjna.mongodb.net/YelpCamp?retryWrites=true&w=majority", {
+mongoose.connect(process.env.DATABASEURL, {  //the first arguement is defined in the command
 	useNewUrlParser: true,
 	useCreateIndex: true
 }).then(() => {	
@@ -25,8 +25,10 @@ mongoose.connect("mongodb+srv://shamaan321:pk4710086@yelpcamp.gpjna.mongodb.net/
 	console.log("ERROR:",err.message);
 });
 	   
-// mongodb+srv://shamaan321:pk4710086@yelpcamp.gpjna.mongodb.net/<dbname>?retryWrites=true&w=majority 
+// mongodb+srv://shamaan321:pk4710086@yelpcamp.gpjna.mongodb.net/YelpCamp?retryWrites=true&w=majority
 // mongodb://localhost/yelp_camp_v10
+  // used to check which url is being used to switch b/w local and atlas
+						  //defined in the command 
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
