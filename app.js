@@ -19,10 +19,8 @@ var commentRoutes    = require("./routes/comments"),
 mongoose.connect("mongodb+srv://shamaan321:pk4710086@yelpcamp.gpjna.mongodb.net/YelpCamp?retryWrites=true&w=majority", {
 	useNewUrlParser: true,
 	useCreateIndex: true
-}).then(() => {
-	
-	console.log("Connected to db!");
-	
+}).then(() => {	
+	console.log("Connected to db!");	
 }).catch( err => {
 	console.log("ERROR:",err.message);
 });
