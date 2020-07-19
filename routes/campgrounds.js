@@ -11,7 +11,7 @@ router.get("/", function(req, res){
        if(err){
            console.log(err);
        } else {
-          res.render("campgrounds/index",{campgrounds:allCampgrounds});
+          res.render("campgrounds/index",{campgrounds:allCampgrounds}); //int the second arg we are sending the data to the next page
        }
     });
 });
@@ -23,6 +23,7 @@ router.post("/", middleware.isLoggedIn, function(req, res){
     var image = req.body.image;
     var desc = req.body.description;
     var author = {
+		//the session adds the user var to req
         id: req.user._id,
         username: req.user.username
     }
@@ -33,7 +34,7 @@ router.post("/", middleware.isLoggedIn, function(req, res){
             console.log(err);
         } else {
             //redirect back to campgrounds page
-            console.log(newlyCreated);
+            req.flash("success", "Successfully created a camp!");
             res.redirect("/campgrounds");
         }
     });

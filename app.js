@@ -1,15 +1,15 @@
-var express     = require("express"),
-    app         = express(),
-    bodyParser  = require("body-parser"),
-    mongoose    = require("mongoose"),
-    flash       = require("connect-flash"),
-    passport    = require("passport"),
-    LocalStrategy = require("passport-local"),
-    methodOverride = require("method-override"),
-    Campground  = require("./models/campground"),
-    Comment     = require("./models/comment"),
-    User        = require("./models/user"),
-    seedDB      = require("./seeds")
+var express   		= require("express"),
+    app         	= express(),
+    bodyParser  	= require("body-parser"), //to get the names in the forms
+    mongoose    	= require("mongoose"),
+    flash       	= require("connect-flash"), //for the error and success messages
+    passport    	= require("passport"),	//for built-in user authentication
+    LocalStrategy 	= require("passport-local"),
+    methodOverride 	= require("method-override"), //to use the put request in place of post
+    Campground  	= require("./models/campground"),
+    Comment     	= require("./models/comment"),
+    User        	= require("./models/user"),
+    seedDB      	= require("./seeds")
     
 //requiring routes
 var commentRoutes    = require("./routes/comments"),
@@ -21,19 +21,18 @@ mongoose.connect(process.env.DATABASEURL, {  //the first arguement is defined in
 	useCreateIndex: true
 }).then(() => {	
 	console.log("Connected to db!");	
-}).catch( err => {
+}).catch( err => { //if only one param of call back then brackets not required around param
 	console.log("ERROR:",err.message);
 });
 	   
 // mongodb+srv://shamaan321:pk4710086@yelpcamp.gpjna.mongodb.net/YelpCamp?retryWrites=true&w=majority
 // mongodb://localhost/yelp_camp_v10
-  // used to check which url is being used to switch b/w local and atlas
-						  //defined in the command 
+
 
 app.use(bodyParser.urlencoded({extended: true}));
-app.set("view engine", "ejs");
+app.set("view engine", "ejs"); //no need to add .ejs when locating ejs files
 app.use(express.static(__dirname + "/public"));
-app.use(methodOverride("_method"));
+app.use(methodOverride("_method")); //this will be used in the froms request 
 app.use(flash());
 //seedDB(); //seed the database
 
@@ -49,6 +48,7 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
+//setting up flash messages to be used 
 app.use(function(req, res, next){
    res.locals.currentUser = req.user;
    res.locals.error = req.flash("error");
@@ -56,6 +56,7 @@ app.use(function(req, res, next){
    next();
 });
 
+//locating the routes to be used
 app.use("/", indexRoutes);
 app.use("/campgrounds", campgroundRoutes);
 app.use("/campgrounds/:id/comments", commentRoutes);
