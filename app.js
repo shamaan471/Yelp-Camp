@@ -26,7 +26,8 @@ mongoose.connect(process.env.DATABASEURL, {  //the first arguement is defined in
 });
 	   
 // mongodb+srv://shamaan321:pk4710086@yelpcamp.gpjna.mongodb.net/YelpCamp?retryWrites=true&w=majority
-// mongodb://localhost/yelp_camp_v10
+// mongodb://localhost/yelp_camp_v11
+//export DATABASEURL="mongodb://localhost/yelp_camp_v11"
 
 
 app.use(bodyParser.urlencoded({extended: true}));
@@ -48,13 +49,27 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-//setting up flash messages to be used 
-app.use(function(req, res, next){
+//setting up flash messages to be used and also notifications 
+app.use(async function(req, res, next){ //async required for await
    res.locals.currentUser = req.user;
+   if(req.user) {
+    try {
+      let user = await User.findById(req.user._id).populate('notifications', null, { isRead: false }).exec(); //only find unread notifications
+      res.locals.notifications = user.notifications.reverse();
+    } catch(err) {
+      console.log(err.message);
+    }
+   }
    res.locals.error = req.flash("error");
    res.locals.success = req.flash("success");
    next();
 });
+// app.use(function(req, res, next){
+//    res.locals.currentUser = req.user;
+//    res.locals.error = req.flash("error");
+//    res.locals.success = req.flash("success");
+//    next();
+// });
 
 //locating the routes to be used
 app.use("/", indexRoutes);

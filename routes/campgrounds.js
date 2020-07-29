@@ -1,6 +1,8 @@
 var express = require("express");
 var router  = express.Router();
 var Campground = require("../models/campground");
+var User = require("../models/user");
+var Notification = require("../models/notification");
 var middleware = require("../middleware");
 
 
@@ -38,29 +40,60 @@ router.get("/", function(req, res){
 	}
 });
 
-//CREATE - add new campground to DB
-router.post("/", middleware.isLoggedIn, function(req, res){
+//CREATE - add new campground to DB and generate new notification for followers (very inefficient!!)
+router.post("/", middleware.isLoggedIn, async function(req, res){
     // get data from form and add to campgrounds array
     var name = req.body.name;
     var image = req.body.image;
     var desc = req.body.description;
     var author = {
-		//the session adds the user var to req
         id: req.user._id,
         username: req.user.username
     }
     var newCampground = {name: name, image: image, description: desc, author:author}
-    // Create a new campground and save to DB
-    Campground.create(newCampground, function(err, newlyCreated){
-        if(err){
-            console.log(err);
-        } else {
-            //redirect back to campgrounds page
-            req.flash("success", "Successfully created a camp!");
-            res.redirect("/campgrounds");
-        }
-    });
+
+    try {
+      let campground = await Campground.create(newCampground);
+      let user = await User.findById(req.user._id).populate('followers').exec();
+      let newNotification = {
+        username: req.user.username,
+        campgroundId: campground.id
+      }
+      for(const follower of user.followers) { //a new type of for loop
+        let notification = await Notification.create(newNotification);
+        follower.notifications.push(notification);
+        follower.save();
+      }
+
+      //redirect back to campgrounds page
+      res.redirect(`/campgrounds/${campground.id}`);
+    } catch(err) {
+      req.flash('error', err.message);
+      res.redirect('back');
+    }
 });
+// router.post("/", middleware.isLoggedIn, function(req, res){
+//     // get data from form and add to campgrounds array
+//     var name = req.body.name;
+//     var image = req.body.image;
+//     var desc = req.body.description;
+//     var author = {
+// 		//the session adds the user var to req
+//         id: req.user._id,
+//         username: req.user.username
+//     }
+//     var newCampground = {name: name, image: image, description: desc, author:author}
+//     // Create a new campground and save to DB
+//     Campground.create(newCampground, function(err, newlyCreated){
+//         if(err){
+//             console.log(err);
+//         } else {
+//             //redirect back to campgrounds page
+//             req.flash("success", "Successfully created a camp!");
+//             res.redirect("/campgrounds");
+//         }
+//     });
+// });
 
 //NEW - show form to create new campground
 router.get("/new", middleware.isLoggedIn, function(req, res){
